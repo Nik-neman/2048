@@ -38,7 +38,7 @@ public class Model {
         this.gameTiles = new Tile[FIELD_WIDTH][FIELD_WIDTH];
         for(int i = 0; i < gameTiles.length; i++){
             for (int j = 0; j < gameTiles[i].length; j++){
-                gameTiles[i][j] = new Tile();
+                gameTiles[i][j] = new Tile(0);
             }
         }
         this.score = 0;
@@ -47,29 +47,42 @@ public class Model {
         addTile();
     }
 
-    private void compressTiles(Tile[] tiles){
+    private boolean compressTiles(Tile[] tiles){
+        boolean changed = false;
         for (int i =0; i < tiles.length-1; i++){
             for (int j = 0; j < tiles.length - 1; j++){
-                if(tiles[j].value == 0){
+                if(tiles[j].value == 0 && tiles[j + 1].value != 0){
                     tiles[j].value = tiles[j + 1].value;
                     tiles[j + 1].value = 0;
+                    changed = true;
                 }
             }
         }
-
+        return changed;
     }
 
-    private void mergeTiles(Tile[] tiles){
-
+    private boolean mergeTiles(Tile[] tiles){
+        boolean changed = false;
         for(int i = 0; i < tiles.length-1; i ++) {
-
-            if (tiles[i].value == tiles[i + 1].value) {
+            if (tiles[i].value == tiles[i + 1].value && tiles[i].value != 0) {
                 tiles[i].value += tiles[i].value;
                 tiles[i + 1].value = 0;
                 this.compressTiles(tiles);
                 if (tiles[i].value > maxTile) maxTile = tiles[i].value;
                 score += tiles[i].value;
+                changed = true;
             }
+        }
+        return changed;
+    }
+
+    void left(){
+        for (Tile[] tiles: gameTiles){
+
+            if (compressTiles(tiles) & mergeTiles(tiles)) {
+                addTile();
+            }
+
         }
     }
 }
