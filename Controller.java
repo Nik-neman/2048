@@ -38,6 +38,12 @@ public class Controller extends KeyAdapter {
         if(!model.canMove()){
             view.isGameLost = true;
         }
+        if (keyEvent.getKeyCode() == KeyEvent.VK_R){
+            model.randomMove();
+        }
+        if (keyEvent.getKeyCode() == KeyEvent.VK_A){
+            model.autoMove();
+        }
         if(view.isGameLost == false && view.isGameWon == false){
             if (keyEvent.getKeyCode() == KeyEvent.VK_LEFT) {
                 model.left();

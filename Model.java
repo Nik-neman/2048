@@ -1,9 +1,6 @@
 package com.javarush.task.task35.task3513;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class Model {
     private final static int FIELD_WIDTH = 4;
@@ -86,7 +83,10 @@ public class Model {
         }
 
         for (Tile[] tiles: gameTiles){
-            if (compressTiles(tiles) & mergeTiles(tiles)) {
+            boolean a = compressTiles(tiles);
+            boolean b = mergeTiles(tiles);
+
+            if (a || b) {
                 addTile();
             }
         }
@@ -172,5 +172,54 @@ public class Model {
             gameTiles =(Tile[][]) previousStates.pop();
             score = previousScores.pop();
         }
+    }
+
+    public void randomMove(){
+        int n = ((int) (Math.random() * 100)) % 4;
+        switch (n){
+            case 0: left();
+            break;
+            case 1: right();
+            break;
+            case 2: up();
+            break;
+            default: down();
+        }
+    }
+
+    private boolean hasBoardChanged(){
+        boolean changed = false;
+        Tile[][] safed = previousStates.peek();
+
+        for(int i = 0; i < FIELD_WIDTH; i++){
+            for (int j = 0; j < FIELD_WIDTH; j++){
+                if(safed[i][j].value != gameTiles[i][j].value){
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    }
+
+    private MoveEfficiency getMoveEfficiency(Move move){
+        move.move();
+        MoveEfficiency moveEfficiency = new MoveEfficiency(getEmptyTiles().size(), score, move);
+
+        if(!hasBoardChanged()){
+           return new MoveEfficiency(-1, 0, move);
+        }
+        rollback();
+       return moveEfficiency;
+    }
+
+      void autoMove(){
+        PriorityQueue<MoveEfficiency> priorityQueue = new PriorityQueue<>( 4, Collections.reverseOrder());
+
+        priorityQueue.offer(getMoveEfficiency(this::left));
+        priorityQueue.offer(getMoveEfficiency(this::right));
+        priorityQueue.offer(getMoveEfficiency(this::up));
+        priorityQueue.offer(getMoveEfficiency(this::down));
+
+        priorityQueue.poll().getMove().move();
     }
 }
